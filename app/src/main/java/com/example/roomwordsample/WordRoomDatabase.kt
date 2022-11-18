@@ -10,13 +10,12 @@ import kotlinx.coroutines.launch
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(entities = arrayOf(Word::class), version = 1, exportSchema = false)
-public abstract class WordRoomDatabase : RoomDatabase(){
+abstract class WordRoomDatabase : RoomDatabase() {
     abstract fun wordDao(): WordDao
 
     private class WordDatabaseCallback(
         private val scope: CoroutineScope
     ) : RoomDatabase.Callback() {
-
         override fun onCreate(db: SupportSQLiteDatabase) {
             super.onCreate(db)
             INSTANCE?.let { database ->
@@ -27,13 +26,13 @@ public abstract class WordRoomDatabase : RoomDatabase(){
                     wordDao.deleteAll()
 
                     // Add sample words.
-                    var word = Word(word = "Hello")
+                    var word = Word(word="Hello")
                     wordDao.insert(word)
-                    word = Word(word = "World!")
+                    word = Word(word="World!")
                     wordDao.insert(word)
 
                     // TODO: Add your own words!
-                    word = Word(word = "TODO!")
+                    word = Word(word="TODO!")
                     wordDao.insert(word)
                 }
             }
@@ -41,8 +40,6 @@ public abstract class WordRoomDatabase : RoomDatabase(){
     }
 
     companion object {
-        // Singleton prevents multiple instances of database opening at the
-        // same time.
         @Volatile
         private var INSTANCE: WordRoomDatabase? = null
 
@@ -57,7 +54,9 @@ public abstract class WordRoomDatabase : RoomDatabase(){
                     context.applicationContext,
                     WordRoomDatabase::class.java,
                     "word_database"
-                ).build()
+                )
+                    .addCallback(WordDatabaseCallback(scope))
+                    .build()
                 INSTANCE = instance
                 // return instance
                 instance
